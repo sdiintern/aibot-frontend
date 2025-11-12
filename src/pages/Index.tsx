@@ -99,6 +99,7 @@ const Index = () => {
     <div className="flex flex-col h-screen bg-background">
       <ChatHeader
         onNewChat={handleNewChat}
+        isModelLocked={messages.length > 0}
         selectedModel={selectedModel}
         onSelectModel={setSelectedModel}
       />

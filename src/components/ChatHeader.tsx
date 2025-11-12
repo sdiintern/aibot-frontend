@@ -10,11 +10,12 @@ import { Plus, ChevronDown } from "lucide-react";
 
 interface ChatHeaderProps {
   onNewChat: () => void;
+  isModelLocked?: boolean;
   selectedModel: string;
   onSelectModel: (model: string) => void;
 }
 
-const ChatHeader = ({ onNewChat, selectedModel, onSelectModel }: ChatHeaderProps) => {
+const ChatHeader = ({ onNewChat, isModelLocked = false, selectedModel, onSelectModel }: ChatHeaderProps) => {
 
   const models = [
     "Anthropic Claude Sonnet 4",
@@ -31,13 +32,14 @@ const ChatHeader = ({ onNewChat, selectedModel, onSelectModel }: ChatHeaderProps
               <Button
                 variant="secondary"
                 size="sm"
-                className="gap-2 rounded-full bg-muted hover:bg-muted/80"
+                disabled={isModelLocked}
+                className="gap-2 rounded-full bg-muted hover:bg-muted/80 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {selectedModel}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 z-50 bg-background">
               {models.map((model) => (
                 <DropdownMenuItem
                   key={model}
