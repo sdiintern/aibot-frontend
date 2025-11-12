@@ -1,24 +1,63 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus, ChevronDown } from "lucide-react";
 
 interface ChatHeaderProps {
   onNewChat: () => void;
 }
 
 const ChatHeader = ({ onNewChat }: ChatHeaderProps) => {
+  const [selectedModel, setSelectedModel] = useState("Anthropic Claude Sonnet 4");
+
+  const models = [
+    "Anthropic Claude Sonnet 4",
+    "Anthropic Claude Opus 4",
+  ];
+
   return (
     <header className="border-b bg-background px-4 py-3">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <h1 className="text-xl font-semibold">Chat</h1>
-        <Button
-          onClick={onNewChat}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          New chat
-        </Button>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="gap-2 rounded-full bg-muted hover:bg-muted/80"
+              >
+                {selectedModel}
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {models.map((model) => (
+                <DropdownMenuItem
+                  key={model}
+                  onClick={() => setSelectedModel(model)}
+                  className="cursor-pointer"
+                >
+                  {model}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
+            onClick={onNewChat}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            New chat
+          </Button>
+        </div>
       </div>
     </header>
   );
