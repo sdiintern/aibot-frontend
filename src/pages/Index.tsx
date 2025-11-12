@@ -16,10 +16,17 @@ interface Message {
 const CREATE_CHAT_URL = "https://aibot-backend-xl3x.onrender.com/create-chat";
 const SEND_MESSAGE_URL = "https://aibot-backend-xl3x.onrender.com/send-message";
 
+// Map model names to backend IDs
+const modelMap: Record<string, string> = {
+  "Anthropic Claude Sonnet 4": "azure~anthropic.claude-4-sonnet",
+  "Anthropic Claude Opus 4": "azure~anthropic.claude-4-opus",
+};
+
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatId, setChatId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("Anthropic Claude Sonnet 4"); 
 
   const handleNewChat = () => {
     setMessages([]);
@@ -43,7 +50,7 @@ const Index = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "azure~anthropic.claude-4-opus",
+            model: modelMap[selectedModel], // use selected model
           }),
         });
         const createData = await createResponse.json();
@@ -66,12 +73,12 @@ const Index = () => {
 
       console.log("Send response status:", sendResponse.status);
       const sendData = await sendResponse.json();
-      console.log("Send message response:", sendData); // <-- add this
+      console.log("Send message response:", sendData); 
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: sendData.response?.content || "No response from assistant", // adjust if your API returns differently
+        content: sendData.response?.content || "No response from assistant", 
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -90,7 +97,11 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <ChatHeader onNewChat={handleNewChat} />
+      <ChatHeader
+        onNewChat={handleNewChat}
+        selectedModel={selectedModel}
+        onSelectModel={setSelectedModel}
+      />
       
       <main className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (

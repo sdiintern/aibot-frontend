@@ -10,10 +10,11 @@ import { Plus, ChevronDown } from "lucide-react";
 
 interface ChatHeaderProps {
   onNewChat: () => void;
+  selectedModel: string;
+  onSelectModel: (model: string) => void;
 }
 
-const ChatHeader = ({ onNewChat }: ChatHeaderProps) => {
-  const [selectedModel, setSelectedModel] = useState("Anthropic Claude Sonnet 4");
+const ChatHeader = ({ onNewChat, selectedModel, onSelectModel }: ChatHeaderProps) => {
 
   const models = [
     "Anthropic Claude Sonnet 4",
@@ -40,7 +41,7 @@ const ChatHeader = ({ onNewChat }: ChatHeaderProps) => {
               {models.map((model) => (
                 <DropdownMenuItem
                   key={model}
-                  onClick={() => setSelectedModel(model)}
+                  onClick={() => onSelectModel(model)}
                   className="cursor-pointer"
                 >
                   {model}
