@@ -55,7 +55,7 @@ const Index = () => {
         });
         const createData = await createResponse.json();
         console.log("Create chat response:", createData);
-        currentChatId = createData.id; // adjust if your response uses a different key
+        currentChatId = createData.id; 
         setChatId(currentChatId);
       }
 
