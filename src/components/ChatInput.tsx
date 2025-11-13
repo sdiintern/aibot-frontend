@@ -2,6 +2,9 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Paperclip } from "lucide-react";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -16,11 +19,40 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const extractTextFromPDF = async (file: File) => {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+    let fullText = "";
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map(item => (item as any).str).join(" ");
+      fullText += pageText + "\n\n";
+    }
+    return fullText;
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      console.log("Files selected:", files);
-      // Handle file upload logic here
+      const file = files[0];
+      if (file.type !== "application/pdf") {
+        alert("Please select a PDF file.");
+        return;
+      }
+
+      try {
+        const extractedText = await extractTextFromPDF(file);
+        console.log("Extracted PDF text:", extractedText);
+        onSend(`PDF content:\n${extractedText}`);
+      } catch (err) {
+        console.error("Error extracting PDF text:", err);
+        alert("Failed to process PDF.");
+      }
+
+      // Reset input so user can select the same file again if needed
+      e.target.value = "";
     }
   };
 
@@ -47,7 +79,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
           type="file"
           onChange={handleFileChange}
           className="hidden"
-          multiple
+          multiple //accept="application/pdf"
         />
         <Button
           type="button"
