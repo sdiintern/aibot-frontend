@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Paperclip } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
+import { toast } from "@/components/ui/use-toast";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
@@ -39,15 +40,23 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
       const file = files[0];
 
       if (file.type !== "application/pdf") {
-        alert("Please select a PDF file.");
+        toast({
+          title: "Invalid file type",
+          description: "Please select a PDF file.",
+          variant: "destructive",
+        });
         return;
       }
 
       // Size check
-      const MAX_SIZE_MB = 5;
+      const MAX_SIZE_MB = 2;
       const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
       if (file.size > MAX_SIZE_BYTES) {
-        alert(`Please select a PDF smaller than ${MAX_SIZE_MB} MB.`);
+        toast({
+          title: "File too large",
+          description: `Please select a PDF smaller than ${MAX_SIZE_MB} MB.`,
+          variant: "destructive",
+        });
         return;
       }
 
@@ -55,13 +64,22 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
       try {
         // 1. Extract text for backend
         const extractedText = await extractTextFromPDF(file);
+        // Check if extraction succeeded
+        if (!extractedText || extractedText.trim().length === 0) {
+          throw new Error("No text could be extracted from this PDF.");
+        }
+        console.log("Extracted text:", extractedText); 
 
         // 2. Send extracted text to backend via parent onSend
         onSend(extractedText, { isPDF: true, fileName: file.name, file });
 
       } catch (err) {
         console.error("Error extracting PDF text:", err);
-        alert("Failed to process PDF.");
+        toast({
+          title: "Error processing PDF",
+          description: (err as Error).message || "Failed to extract text from the PDF.",
+          variant: "destructive",
+        });
       }
 
       e.target.value = ""; // Reset file input
