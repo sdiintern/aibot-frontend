@@ -7,7 +7,7 @@ import * as pdfjsLib from "pdfjs-dist";
 pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
 interface ChatInputProps {
-  onSend: (message: string) => void;
+  onSend: (content: string, pdfInfo?: { isPDF: boolean; fileName: string; file: File }) => void;
   disabled?: boolean;
 }
 
@@ -35,25 +35,27 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      if (file.type !== "application/pdf") {
-        alert("Please select a PDF file.");
-        return;
-      }
+    if (!files || files.length === 0) return;
 
-      try {
-        const extractedText = await extractTextFromPDF(file);
-        console.log("Extracted PDF text:", extractedText);
-        onSend(`PDF content:\n${extractedText}`);
-      } catch (err) {
-        console.error("Error extracting PDF text:", err);
-        alert("Failed to process PDF.");
-      }
-
-      // Reset input so user can select the same file again if needed
-      e.target.value = "";
+    const file = files[0];
+    if (file.type !== "application/pdf") {
+      alert("Please select a PDF file.");
+      return;
     }
+
+    try {
+      // 1. Extract text for backend
+      const extractedText = await extractTextFromPDF(file);
+
+      // 2. Send extracted text to backend via parent onSend
+      onSend(extractedText, { isPDF: true, fileName: file.name, file });
+
+    } catch (err) {
+      console.error("Error extracting PDF text:", err);
+      alert("Failed to process PDF.");
+    }
+
+    e.target.value = ""; // Reset file input
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -79,7 +81,6 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
           type="file"
           onChange={handleFileChange}
           className="hidden"
-          multiple //accept="application/pdf"
         />
         <Button
           type="button"

@@ -1,12 +1,16 @@
-import { useState } from "react";
 import ChatHeader from "@/components/ChatHeader";
 import ChatMessage from "@/components/ChatMessage";
 import ChatInput from "@/components/ChatInput";
+import { useState, useRef, useEffect } from "react";
+
 
 interface Message {
   id: string;
   role: "user" | "assistant";
-  content: string;
+  type?: "text" | "pdf";
+  content?: string;
+  fileName?: string;
+  fileUrl?: string;
 }
 
 //for testing purposes
@@ -26,21 +30,52 @@ const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatId, setChatId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("Anthropic Claude Sonnet 4"); 
+  const [selectedModel, setSelectedModel] = useState("Anthropic Claude Sonnet 4");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Auto scroll whenever messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
 
   const handleNewChat = () => {
     setMessages([]);
     setChatId(null);
   };
 
-  const handleSendMessage = async (content: string) => {
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content,
-    };
-    setMessages((prev) => [...prev, userMessage]);
+  const handleSendMessage = async (
+    content: string,
+    pdfInfo?: { isPDF: boolean; fileName: string; file: File }
+  ) => {
     setLoading(true);
+    // Add user message to frontend
+    if (pdfInfo?.isPDF && pdfInfo.file) {
+      const fileUrl = URL.createObjectURL(pdfInfo.file); // for frontend rendering
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "user",
+          type: "pdf",
+          fileName: pdfInfo.fileName,
+          fileUrl,
+        },
+      ]);
+    } else {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "user",
+          type: "text",
+          content,
+        },
+      ]);
+    }
 
     try {
       // Step 1: Create chat if no chatId exists
@@ -78,18 +113,22 @@ const Index = () => {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
+        type: "text",
         content: sendData.response?.content || "No response from assistant", 
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
       console.error(err);
-      const errorMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        role: "assistant",
-        content: "Error sending message. Please try again.",
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: (Date.now() + 2).toString(),
+          role: "assistant",
+          type: "text",
+          content: "Error sending message. Please try again.",
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -103,7 +142,7 @@ const Index = () => {
         selectedModel={selectedModel}
         onSelectModel={setSelectedModel}
       />
-      
+
       <main className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
@@ -122,14 +161,18 @@ const Index = () => {
               <ChatMessage
                 key={message.id}
                 role={message.role}
+                type={message.type}
                 content={message.content}
+                fileName={message.fileName}
+                fileUrl={message.fileUrl}
               />
             ))}
-          </div>
-        )}
-        {loading && (
-          <div className="text-center text-sm text-muted-foreground my-2">
-            Assistant is typing...
+            {loading && (
+              <div className="text-center text-sm text-muted-foreground my-2">
+                Assistant is typing...
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
         )}
       </main>

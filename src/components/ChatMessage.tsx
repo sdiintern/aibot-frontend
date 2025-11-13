@@ -3,12 +3,15 @@ import { Bot, User } from "lucide-react";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
-  content: string;
+  content?: string;
+  type?: "text" | "pdf";
+  fileName?: string;
+  fileUrl?: string;
 }
 
-const ChatMessage = ({ role, content }: ChatMessageProps) => {
+const ChatMessage = ({ role, content, type = "text", fileName, fileUrl }: ChatMessageProps) => {
   const isUser = role === "user";
-  
+
   return (
     <div className={cn("py-6 px-4", !isUser && "bg-chat-assistant")}>
       <div className="max-w-3xl mx-auto">
@@ -32,7 +35,18 @@ const ChatMessage = ({ role, content }: ChatMessageProps) => {
                   : "bg-background text-foreground border"
               )}
             >
-              <p className="whitespace-pre-wrap">{content}</p>
+              {type === "pdf" && fileName && fileUrl ? (
+                <a
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  {fileName}
+                </a>
+              ) : (
+                <p className="whitespace-pre-wrap">{content}</p>
+              )}
             </div>
           </div>
         </div>
