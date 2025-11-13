@@ -35,27 +35,37 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
+    if (files && files.length > 0) {
+      const file = files[0];
 
-    const file = files[0];
-    if (file.type !== "application/pdf") {
-      alert("Please select a PDF file.");
-      return;
+      if (file.type !== "application/pdf") {
+        alert("Please select a PDF file.");
+        return;
+      }
+
+      // Size check
+      const MAX_SIZE_MB = 5;
+      const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+      if (file.size > MAX_SIZE_BYTES) {
+        alert(`Please select a PDF smaller than ${MAX_SIZE_MB} MB.`);
+        return;
+      }
+
+
+      try {
+        // 1. Extract text for backend
+        const extractedText = await extractTextFromPDF(file);
+
+        // 2. Send extracted text to backend via parent onSend
+        onSend(extractedText, { isPDF: true, fileName: file.name, file });
+
+      } catch (err) {
+        console.error("Error extracting PDF text:", err);
+        alert("Failed to process PDF.");
+      }
+
+      e.target.value = ""; // Reset file input
     }
-
-    try {
-      // 1. Extract text for backend
-      const extractedText = await extractTextFromPDF(file);
-
-      // 2. Send extracted text to backend via parent onSend
-      onSend(extractedText, { isPDF: true, fileName: file.name, file });
-
-    } catch (err) {
-      console.error("Error extracting PDF text:", err);
-      alert("Failed to process PDF.");
-    }
-
-    e.target.value = ""; // Reset file input
   };
 
   const handleSubmit = (e: React.FormEvent) => {
