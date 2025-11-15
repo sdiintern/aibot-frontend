@@ -3,19 +3,20 @@ import { Bot, User } from "lucide-react";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
-  content?: string;
-  type?: "text" | "pdf";
-  fileName?: string;
-  fileUrl?: string;
+  content?: string; // User typed message
+  fileName?: string; // PDF file name
+  fileUrl?: string; // PDF URL
+  type?: "text" | "pdf"; // optional, won't affect rendering
 }
 
-const ChatMessage = ({ role, content, type = "text", fileName, fileUrl }: ChatMessageProps) => {
+const ChatMessage = ({ role, content, fileName, fileUrl }: ChatMessageProps) => {
   const isUser = role === "user";
 
   return (
     <div className={cn("py-6 px-4", !isUser && "bg-chat-assistant")}>
       <div className="max-w-3xl mx-auto">
         <div className={cn("flex gap-4", isUser && "flex-row-reverse")}>
+          {/* Avatar */}
           <div
             className={cn(
               "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
@@ -26,6 +27,8 @@ const ChatMessage = ({ role, content, type = "text", fileName, fileUrl }: ChatMe
           >
             {isUser ? <User className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
           </div>
+
+          {/* Message content */}
           <div className={cn("flex-1 space-y-2", isUser && "flex justify-end")}>
             <div
               className={cn(
@@ -35,18 +38,19 @@ const ChatMessage = ({ role, content, type = "text", fileName, fileUrl }: ChatMe
                   : "bg-background text-foreground border"
               )}
             >
-              {type === "pdf" && fileName && fileUrl ? (
+              {/* PDF link (if exists) */}
+              {fileName && fileUrl && (
                 <a
                   href={fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 underline"
+                  className="text-blue-600 underline block mt-1 mb-2"
                 >
                   {fileName}
                 </a>
-              ) : (
-                <p className="whitespace-pre-wrap">{content}</p>
               )}
+              {/* User text */}
+              {content && <p className="whitespace-pre-wrap">{content}</p>}
             </div>
           </div>
         </div>

@@ -14,11 +14,11 @@ interface Message {
 }
 
 //for testing purposes
-const CREATE_CHAT_URL = "http://localhost:5000/create-chat";
-const SEND_MESSAGE_URL = "http://localhost:5000/send-message";
+// const CREATE_CHAT_URL = "http://localhost:5000/create-chat";
+// const SEND_MESSAGE_URL = "http://localhost:5000/send-message";
 
-// const CREATE_CHAT_URL = "https://aibot-backend-xl3x.onrender.com/create-chat";
-// const SEND_MESSAGE_URL = "https://aibot-backend-xl3x.onrender.com/send-message";
+const CREATE_CHAT_URL = "https://aibot-backend-xl3x.onrender.com/create-chat";
+const SEND_MESSAGE_URL = "https://aibot-backend-xl3x.onrender.com/send-message";
 
 // Map model names to backend IDs
 const modelMap: Record<string, string> = {
@@ -49,7 +49,9 @@ const Index = () => {
 
   const handleSendMessage = async (
     content: string,
-    pdfInfo?: { isPDF: boolean; fileName: string; file: File }
+    pdfInfo?: {
+      displayText: string; isPDF: boolean; fileName: string; file: File 
+}
   ) => {
     setLoading(true);
     // Add user message to frontend
@@ -60,9 +62,10 @@ const Index = () => {
         {
           id: Date.now().toString(),
           role: "user",
-          type: "pdf",
-          fileName: pdfInfo.fileName,
-          fileUrl,
+          type: pdfInfo?.isPDF ? "pdf" : "text",
+          content: pdfInfo?.displayText || content,
+          fileName: pdfInfo?.fileName,
+          fileUrl: pdfInfo?.file ? URL.createObjectURL(pdfInfo.file) : undefined,
         },
       ]);
     } else {
