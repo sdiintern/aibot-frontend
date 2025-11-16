@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Paperclip, X } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
 import { toast } from "@/components/ui/use-toast";
+import Tesseract from "tesseract.js";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
@@ -47,43 +48,70 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
 
     const file = files[0];
 
-    if (file.type !== "application/pdf") {
-      toast({
-        title: "Invalid file type",
-        description: "Please select a PDF file.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const MAX_SIZE_MB = 2;
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: `Please select a PDF smaller than ${MAX_SIZE_MB} MB.`,
+        description: `Please select a file smaller than ${MAX_SIZE_MB} MB.`,
         variant: "destructive",
       });
       return;
     }
 
-    try {
-      const extractedText = await extractTextFromPDF(file);
-      if (!extractedText.trim()) throw new Error("No text could be extracted from this PDF.");
+    // Handle PDF upload
+    if (file.type === "application/pdf") {
+      try {
+        const extractedText = await extractTextFromPDF(file);
+        if (!extractedText.trim()) throw new Error("No text could be extracted from this PDF.");
+        setPdfFile(file);
+        setPdfText(extractedText);
+        setInput("");
+      } catch (err) {
+        console.error("PDF extraction error:", err);
+        toast({
+          title: "Error processing PDF",
+          description: (err as Error).message || "Failed to extract text from the PDF.",
+          variant: "destructive" });
+      }
+    }
 
-      setPdfFile(file);     // Keep track of PDF
-      setPdfText(extractedText); // Store PDF text separately
-      setInput("");         // Keep textarea empty for user to type
-    } catch (err) {
-      console.error("PDF extraction error:", err);
+    // Handle image upload (PNG/JPG for OCR)
+    else if (file.type === "image/png" || file.type === "image/jpeg") {
+      try {
+        const result = await Tesseract.recognize(file, "eng", {
+          logger: (m) => console.log(m), // progress logs
+        });
+
+        const extractedText = result.data.text;
+
+        if (!extractedText.trim()) {
+          throw new Error("No text found in image.");
+        }
+
+        setPdfFile(file); // reuse existing PDF-style handling
+        setPdfText(extractedText);
+        setInput("");
+
+      } catch (err) {
+        toast({
+          title: "Error processing image",
+          description: (err as Error).message || "Failed to extract text from the image.",
+          variant: "destructive",
+        });
+      }
+    }
+
+    else {
       toast({
-        title: "Error processing PDF",
-        description: (err as Error).message || "Failed to extract text from the PDF.",
+        title: "Unsupported file type",
+        description: "Please upload a PDF, PNG or JPG.",
         variant: "destructive",
       });
-    } finally {
-      e.target.value = ""; // Reset file input
     }
+
+    e.target.value = "";
   };
+
 
   const removePdf = () => {
     setPdfFile(null);
@@ -129,7 +157,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
         {/* PDF attached badge */}
         {pdfFile && (
           <div className="flex items-center justify-between bg-gray-200 text-gray-800 px-3 py-1 rounded">
-            <span>📄 PDF attached: {pdfFile.name}</span>
+            <span>📄 File attached: {pdfFile.name}</span>
             <Button
               type="button"
               variant="ghost"
