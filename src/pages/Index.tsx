@@ -15,7 +15,7 @@ interface Message {
 
 //for testing purposes
 // const CREATE_CHAT_URL = "http://localhost:5000/create-chat";
-// const SEND_MESSAGE_URL = "http://localhost:5000/send-message";
+// const SEND_MESSAGE_URL = "http://localhost:5000/send-message"; 
 
 const CREATE_CHAT_URL = "https://aibot-backend-xl3x.onrender.com/create-chat";
 const SEND_MESSAGE_URL = "https://aibot-backend-xl3x.onrender.com/send-message";
