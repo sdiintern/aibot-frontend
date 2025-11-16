@@ -6,10 +6,11 @@ interface ChatMessageProps {
   content?: string; // User typed message
   fileName?: string; // PDF file name
   fileUrl?: string; // PDF URL
-  type?: "text" | "pdf"; // optional, won't affect rendering
+  type?: "text" | "pdf";
+  displayText?: string;
 }
 
-const ChatMessage = ({ role, content, fileName, fileUrl }: ChatMessageProps) => {
+const ChatMessage = ({ role, content, fileName, fileUrl, displayText }: ChatMessageProps) => {
   const isUser = role === "user";
 
   return (

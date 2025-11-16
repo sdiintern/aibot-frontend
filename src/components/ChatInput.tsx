@@ -9,11 +9,12 @@ import Tesseract from "tesseract.js";
 pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
 interface PdfInfo {
-  isPDF: boolean;
-  fileName: string;
-  file: File;
-  displayText?: string; 
+  isPDF?: boolean;
+  fileName?: string;
+  file?: File;
+  displayText?: string;
 }
+
 
 interface ChatInputProps {
   onSend: (content: string, pdfInfo?: PdfInfo) => void;
@@ -122,16 +123,16 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
     e.preventDefault();
     if (disabled) return;
 
-    // Combine PDF text + user input
-    const combinedText = pdfText + (pdfText && input ? "\n\n" : "") + input;
+    const userInput = " " + input;
+    const combinedText = pdfText + (pdfText && input ? "\n\n" : "") + userInput;
 
     if (!combinedText.trim()) return;
 
     if (pdfFile) {
-      onSend(combinedText, { isPDF: true, fileName: pdfFile.name, file: pdfFile, displayText: input });
+      onSend(combinedText, { isPDF: true, fileName: pdfFile.name, file: pdfFile, displayText: userInput });
       removePdf();
     } else {
-      onSend(combinedText);
+      onSend(input, { displayText: input });
     }
 
     setInput(""); // Clear user input after sending
