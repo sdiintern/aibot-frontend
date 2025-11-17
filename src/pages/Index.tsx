@@ -35,7 +35,7 @@ const modelMap: Record<string, string> = {
   "OpenAI o3-mini": "azure~openai.o3-mini",
   "OpenAI o3": "azure~openai.o3",
   "OpenAI GPT-4o-mini": "azure~openai.gpt-4o-mini",
-  "OpenAI GPT-4o": "azure~openai.gpt-4o",
+  "OpenAI GPT-4o": "azure~openai.gpt-4o"
 };
 
 const Index = () => {
