@@ -24,6 +24,18 @@ const SEND_MESSAGE_URL = "https://aibot-backend-xl3x.onrender.com/send-message";
 const modelMap: Record<string, string> = {
   "Anthropic Claude Sonnet 4": "azure~anthropic.claude-4-sonnet",
   "Anthropic Claude Opus 4": "azure~anthropic.claude-4-opus",
+  "OpenAI GPT-5-nano": "azure~openai.gpt-5-nano",
+  "OpenAI GPT-5-mini": "azure~openai.gpt-5-mini",
+  "OpenAI GPT-5": "azure~openai.gpt-5",
+  "Google Gemini 2.5 Pro": "azure~google.gemini-2-5-pro",
+  "Google Gemini 2.5 Flash": "azure~google.gemini-2-5-flash",
+  "Google Gemini 2.5 Flash Lite": "azure~google.gemini-2-5-flash-lite",
+  "Anthropic Claude Sonnet 4.5": "azure~anthropic.claude-4-5-sonnet",
+  "Anthropic Claude Opus 4.1": "azure~anthropic.claude-4-1-opus",
+  "OpenAI o3-mini": "azure~openai.o3-mini",
+  "OpenAI o3": "azure~openai.o3",
+  "OpenAI GPT-4o-mini": "azure~openai.gpt-4o-mini",
+  "OpenAI GPT-4o": "azure~openai.gpt-4o",
 };
 
 const Index = () => {

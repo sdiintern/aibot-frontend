@@ -20,6 +20,18 @@ const ChatHeader = ({ onNewChat, isModelLocked = false, selectedModel, onSelectM
   const models = [
     "Anthropic Claude Sonnet 4",
     "Anthropic Claude Opus 4",
+    "OpenAI GPT-5-nano",
+    "OpenAI GPT-5-mini",
+    "OpenAI GPT-5",
+    "Google Gemini 2.5 Pro",
+    "Google Gemini 2.5 Flash",
+    "Google Gemini 2.5 Flash Lite",
+    "Anthropic Claude Sonnet 4.5",
+    "Anthropic Claude Opus 4.1",
+    "OpenAI o3-mini",
+    "OpenAI o3",
+    "OpenAI GPT-4o-mini",
+    "OpenAI GPT-4o",
   ];
 
   return (
